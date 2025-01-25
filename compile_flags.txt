@@ -1,0 +1,5 @@
+-I.\lib\glfw\include
+-I.\src
+-I.\lib\glad\include
+
+-std=c++20
