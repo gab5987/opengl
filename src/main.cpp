@@ -1,54 +1,16 @@
-// clang-format off
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-// clang-format on
-
-#include <iostream>
 #include <memory>
 
 #include "render/shaders.h"
-
-// settings
-static constexpr unsigned int SCR_WIDTH  = 800;
-static constexpr unsigned int SCR_HEIGHT = 600;
+#include "render/window.h"
 
 int main(int _argc, char *_argv[])
 {
-    glfwInit();
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    auto window = std::make_unique<render::window>();
 
-    GLFWwindow *window =
-        glfwCreateWindow(SCR_WIDTH, SCR_HEIGHT, "OpenGL", nullptr, nullptr);
-    if (window == nullptr)
-    {
-        std::cout << "Failed to create GLFW window\n";
+    render::shader vertex_shader{"data/shaders/basic.vsh"};
+    render::shader fragment_shader{"data/shaders/basic.fsh"};
 
-        glfwTerminate();
-        return -1;
-    }
-
-    glfwMakeContextCurrent(window);
-    glfwSetFramebufferSizeCallback(
-        window, [](GLFWwindow *window, int width, int height) {
-            // make sure the viewport matches the new window dimensions;
-            // that width and height will be significantly larger than specified
-            // on high res displays.
-            glViewport(0, 0, width, height);
-        });
-
-    // glad: load all OpenGL function pointers
-    if (gladLoadGLLoader((GLADloadproc)glfwGetProcAddress) == 0)
-    {
-        std::cout << "Failed to initialize GLAD\n";
-        return -1;
-    }
-
-    shader vertex_shader{"data/shaders/basic.vsh"};
-    shader fragment_shader{"data/shaders/basic.fsh"};
-
-    auto prog = std::make_unique<program>(
+    auto prog = std::make_unique<render::program>(
         std::vector{std::move(vertex_shader), std::move(fragment_shader)});
 
     float vertices[] = {
@@ -92,16 +54,16 @@ int main(int _argc, char *_argv[])
 
     for (;;)
     {
-        if (glfwWindowShouldClose(window) != 0)
+        if (glfwWindowShouldClose(window->get()) != 0)
         {
             break;
         }
 
         // input
         // -----
-        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
+        if (glfwGetKey(window->get(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
         {
-            glfwSetWindowShouldClose(window, 1);
+            glfwSetWindowShouldClose(window->get(), 1);
         }
 
         // render
@@ -118,7 +80,7 @@ int main(int _argc, char *_argv[])
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse
         // moved etc.)
-        glfwSwapBuffers(window);
+        glfwSwapBuffers(window->get());
         glfwPollEvents();
     }
 
@@ -126,7 +88,6 @@ int main(int _argc, char *_argv[])
     glDeleteBuffers(1, &vbo);
     glDeleteBuffers(1, &ebo);
 
-    glfwTerminate();
     return 0;
 }
 

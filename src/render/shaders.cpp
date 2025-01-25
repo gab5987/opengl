@@ -8,7 +8,7 @@
 #include "glad/glad.h"
 #include "render/shaders.h"
 
-unsigned int shader::gl_type_conv(const type type)
+unsigned int render::shader::gl_type_conv(const type type)
 {
     switch (type)
     {
@@ -26,7 +26,7 @@ unsigned int shader::gl_type_conv(const type type)
     }
 }
 
-shader::type shader::check_type(const std::string &path)
+render::shader::type render::shader::check_type(const std::string &path)
 {
     if (path.ends_with("vsh"))
     {
@@ -41,7 +41,7 @@ shader::type shader::check_type(const std::string &path)
     return type::unknown;
 }
 
-void shader::retrive_file(const std::string &path)
+void render::shader::retrive_file(const std::string &path)
 {
     std::ifstream file{path};
     if (!file)
@@ -57,14 +57,14 @@ void shader::retrive_file(const std::string &path)
     file.close();
 }
 
-unsigned int shader::get() const
+unsigned int render::shader::get() const
 {
     return this->_shader;
 }
 
-shader::shader(const std::string &path)
+render::shader::shader(const std::string &path)
 {
-    this->_type = shader::check_type(path);
+    this->_type = render::shader::check_type(path);
     if (this->_type == type::unknown)
     {
         std::cout << "invalid shader type\n";
@@ -90,12 +90,13 @@ shader::shader(const std::string &path)
     }
 };
 
-unsigned int program::get() const
+unsigned int render::program::get() const
 {
     return this->_program;
 }
 
-program::program(std::vector<shader> &&shaders) : _shaders(std::move(shaders))
+render::program::program(std::vector<shader> &&shaders)
+    : _shaders(std::move(shaders))
 {
     this->_program = glCreateProgram();
     std::ranges::for_each(this->_shaders, [this](shader &shader) {
@@ -119,7 +120,7 @@ program::program(std::vector<shader> &&shaders) : _shaders(std::move(shaders))
     });
 };
 
-program::~program()
+render::program::~program()
 {
     glDeleteProgram(this->_program);
 }

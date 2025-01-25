@@ -2,4 +2,5 @@
 -I.\src
 -I.\lib\glad\include
 
+-xc++
 -std=c++20

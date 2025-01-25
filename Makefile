@@ -17,9 +17,9 @@ OUT := $(OUT_DIR)\$(EXE)
 C_FLAGS := -w -g -std=c++20
 
 # Source and object files
+GLAD_OBJ := lib\glad\src\glad.o
 SRC := $(wildcard src/*.cpp) $(wildcard src/**/*.cpp)
 OBJ := $(SRC:.cpp=.o)
-GLAD_OBJ := lib\glad\src\glad.o
 
 # Default target
 all: $(OUT) $(OUT_DIR)\glfw3.dll
@@ -40,10 +40,13 @@ $(OUT): $(OBJ) $(GLAD_OBJ)
 lib\glad\src\glad.o: lib\glad\src\glad.c
 	$(CC) -c $< -o $@ $(C_FLAGS) $(INCS)
 
+# Rule for compiling glad.c separately
+# lib\glad\src\glad.o: lib\glad\src\glad.c
+# 	$(CC) -c $< -o $@ $(C_FLAGS) $(INCS)
+
 # Run the executable
 run: all
 	.\$(OUT)
 
-# Clean the build
 clean:
-	del $(OBJ) $(GLAD_OBJ) $(OUT)
+	del /s /q *.o
