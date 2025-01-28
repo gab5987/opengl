@@ -1,8 +1,8 @@
 #ifndef RENDER_SHADERS_H
 #define RENDER_SHADERS_H
 
+#include <span>
 #include <string>
-#include <vector>
 
 namespace render
 {
@@ -11,13 +11,12 @@ namespace render
         public:
         enum class type : uint8_t
         {
-            unknown,
             vertex,
             fragment,
         };
 
         private:
-        type        _type{type::unknown};
+        const type  _type;
         std::string _source;
 
         unsigned int _shader;
@@ -25,24 +24,28 @@ namespace render
         void retrive_file(const std::string &path);
 
         static unsigned int gl_type_conv(type type);
-        static type         check_type(const std::string &path);
 
         public:
+        void add_uniform(
+            const std::string &name, const void *data, unsigned int size);
+        unsigned int uniform_index() const;
+
         unsigned int get() const;
 
-        explicit shader(const std::string &path);
+        explicit shader(type type, const std::string &path);
     };
 
     class program
     {
-        std::vector<shader> _shaders;
+        std::span<shader> _shaders;
 
         unsigned int _program;
 
         public:
         unsigned int get() const;
+        void         use() const;
 
-        explicit program(std::vector<shader> &&shaders);
+        explicit program(std::span<shader> &&shaders);
         ~program();
     };
 }; // namespace render

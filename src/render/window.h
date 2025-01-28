@@ -17,6 +17,9 @@ namespace render
         static constexpr unsigned int WIDTH  = 800 * 2;
         static constexpr unsigned int HEIGHT = 600 * 2;
 
+        void        swap() const;
+        static void wireframe();
+
         GLFWwindow *get() const;
 
         window();

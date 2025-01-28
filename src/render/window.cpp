@@ -8,6 +8,16 @@
 
 #include "render/window.h"
 
+void render::window::swap() const
+{
+    glfwSwapBuffers(this->_win);
+}
+
+void render::window::wireframe()
+{
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+}
+
 GLFWwindow *render::window::get() const
 {
     return this->_win;

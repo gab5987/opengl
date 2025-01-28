@@ -1,64 +1,66 @@
+#include <array>
 #include <memory>
+#include <span>
 
+#include <spdlog/spdlog.h>
+
+#include "render/buffer.h"
 #include "render/shaders.h"
 #include "render/window.h"
 
 int main(int _argc, char *_argv[])
 {
+    spdlog::info(
+        "spdlog version {}.{}.{}", SPDLOG_VER_MAJOR, SPDLOG_VER_MINOR,
+        SPDLOG_VER_PATCH);
+
     auto window = std::make_unique<render::window>();
 
-    render::shader vertex_shader{"data/shaders/basic.vsh"};
-    render::shader fragment_shader{"data/shaders/basic.fsh"};
+    const char *gl_version = (char *)(glGetString(GL_VERSION));
+    spdlog::info("OpenGL {}", gl_version);
 
-    auto prog = std::make_unique<render::program>(
-        std::vector{std::move(vertex_shader), std::move(fragment_shader)});
+    using shader_type = render::shader::type;
 
-    float vertices[] = {
-        0.5F,  0.5F,  0.0F, // top right
-        0.5F,  -0.5F, 0.0F, // bottom right
-        -0.5F, -0.5F, 0.0F, // bottom left
-        -0.5F, 0.5F,  0.0F  // top left
+    std::array<render::shader, 2> shaders{
+        render::shader{shader_type::vertex, "data/shaders/basic_vert.glsl"},
+        render::shader{shader_type::fragment, "data/shaders/basic_frag.glsl"}};
+
+    auto prog = std::make_unique<render::program>(std::span{shaders});
+
+    float vertices[]{
+        0.0F,  0.0F,  0.0F, // Middle point
+
+        -0.25, 0.25,  0.0F, // left top
+        0.25,  0.25,  0.0F, // right top
+
+        -0.25, -0.25, 0.0F, // left bottom
+        0.25,  -0.25, 0.0F, // right bottm
     };
 
-    unsigned int indices[] = {
-        // note that we start from 0!
-        0, 1, 3, // first Triangle
-        1, 2, 3  // second Triangle
-    };
+    unsigned int indices[]{0, 1, 2, 0, 3, 4};
 
-    unsigned int vbo;
-    unsigned int vao;
-    unsigned int ebo;
-    glGenVertexArrays(1, &vao);
-    glGenBuffers(1, &vbo);
-    glGenBuffers(1, &ebo);
-    glBindVertexArray(vao);
+    render::varr  vao{};
+    render::vbuff vbo{vertices, sizeof(vertices)};
+    render::ibuff ebo{indices, sizeof(indices) / sizeof(indices[0])};
 
-    glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    render::layout layout;
+    layout.push<float>(3);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-    glBufferData(
-        GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(
-        0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
-    glEnableVertexAttribArray(0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    glBindVertexArray(0);
+    vao.add_layout(vbo, layout);
 
     // to draw in wireframe polygons.
-    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    render::window::wireframe();
 
-    for (;;)
+    prog->use();
+
+    const int location = glGetUniformLocation(prog->get(), "un_color");
+    glUniform3f(location, 1.0F, 1.0F, 1.0F);
+
+    float red = 0.0F;
+    float inc = 0.005F;
+
+    while (glfwWindowShouldClose(window->get()) == 0)
     {
-        if (glfwWindowShouldClose(window->get()) != 0)
-        {
-            break;
-        }
-
         // input
         // -----
         if (glfwGetKey(window->get(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
@@ -66,27 +68,28 @@ int main(int _argc, char *_argv[])
             glfwSetWindowShouldClose(window->get(), 1);
         }
 
-        // render
-        // ------
         glClearColor(0.2F, 0.3F, 0.3F, 1.0F);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        // draw first triangle
-        glUseProgram(prog->get());
-        glBindVertexArray(vao);
-        // glDrawArrays(GL_TRIANGLES, 0, 6);
+        prog->use();
+        glUniform3f(location, red, 0, 0);
+
+        vao.bind();
+        ebo.bind();
+
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        // glBindVertexArray(0); // no need to unbind it every time
+
+        if (red >= 0.99F || red <= -0.99F)
+        {
+            inc = -1 * inc;
+        }
+        red += inc;
 
         // glfw: swap buffers and poll IO events (keys pressed/released, mouse
         // moved etc.)
-        glfwSwapBuffers(window->get());
+        window->swap();
         glfwPollEvents();
     }
-
-    glDeleteVertexArrays(1, &vao);
-    glDeleteBuffers(1, &vbo);
-    glDeleteBuffers(1, &ebo);
 
     return 0;
 }

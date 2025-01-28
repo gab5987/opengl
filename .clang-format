@@ -11,5 +11,5 @@ AllowShortIfStatementsOnASingleLine: Never
 AllowShortLoopsOnASingleLine: false
 ColumnLimit: 80
 IndentCaseLabels: true
-NamespaceIndentation: All
+NamespaceIndentation: Inner
 ConstructorInitializerAllOnOneLineOrOnePerLine: true

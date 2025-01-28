@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <span>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -10,35 +11,17 @@
 
 unsigned int render::shader::gl_type_conv(const type type)
 {
-    switch (type)
+    if (type == type::vertex)
     {
-        case type::vertex: {
-            return GL_VERTEX_SHADER;
-        }
-
-        case type::fragment: {
-            return GL_FRAGMENT_SHADER;
-        }
-
-        default: {
-            return 0;
-        }
-    }
-}
-
-render::shader::type render::shader::check_type(const std::string &path)
-{
-    if (path.ends_with("vsh"))
-    {
-        return type::vertex;
+        return GL_VERTEX_SHADER;
     }
 
-    if (path.ends_with("fsh"))
+    if (type == type::fragment)
     {
-        return type::fragment;
+        return GL_FRAGMENT_SHADER;
     }
 
-    return type::unknown;
+    return 0;
 }
 
 void render::shader::retrive_file(const std::string &path)
@@ -62,15 +45,8 @@ unsigned int render::shader::get() const
     return this->_shader;
 }
 
-render::shader::shader(const std::string &path)
+render::shader::shader(type type, const std::string &path) : _type(type)
 {
-    this->_type = render::shader::check_type(path);
-    if (this->_type == type::unknown)
-    {
-        std::cout << "invalid shader type\n";
-        return;
-    }
-
     this->_shader = glCreateShader(shader::gl_type_conv(this->_type));
 
     this->retrive_file(path);
@@ -95,8 +71,12 @@ unsigned int render::program::get() const
     return this->_program;
 }
 
-render::program::program(std::vector<shader> &&shaders)
-    : _shaders(std::move(shaders))
+void render::program::use() const
+{
+    glUseProgram(this->_program);
+}
+
+render::program::program(std::span<shader> &&shaders) : _shaders(shaders)
 {
     this->_program = glCreateProgram();
     std::ranges::for_each(this->_shaders, [this](shader &shader) {
