@@ -3,7 +3,7 @@ EXE := teste.exe
 CC := g++
 
 # Include and Library directories
-INCS := -I.\lib\glfw\include -I.\src -I.\lib\glad\include -I.\lib\spdlog\include -I.\lib\glm
+INCS := -I.\lib\glfw\include -I.\src -I.\lib\glad\include -I.\lib\spdlog\include -I.\lib\glm -I.\lib\stb_image
 LIBS := -L.\lib\glfw\ -lglfw3dll -lopengl32 -L.\lib\spdlog\build\Debug -lspdlogd
 
 # Redistribuible libs
@@ -18,6 +18,7 @@ C_FLAGS := -w -g -std=c++20
 
 # Source and object files
 GLAD_OBJ := lib\glad\src\glad.o
+STB_OBJ := lib\stb_image\stb_image.o
 SRC := $(wildcard src/*.cpp) $(wildcard src/**/*.cpp)
 OBJ := $(SRC:.cpp=.o)
 
@@ -29,8 +30,8 @@ $(OUT_DIR)\glfw3.dll:
 	copy $(GLFW_DLL) $(OUT_DIR)\glfw3.dll
 
 # Rule for building the executable
-$(OUT): $(OBJ) $(GLAD_OBJ)
-	$(CC) $(OBJ) $(GLAD_OBJ) -o $(OUT) $(INCS) $(LIBS)
+$(OUT): $(OBJ) $(GLAD_OBJ) $(STB_OBJ)
+	$(CC) $(OBJ) $(GLAD_OBJ) $(STB_OBJ) -o $(OUT) $(INCS) $(LIBS)
 
 # Rule for compiling .cpp files to .o (object files)
 %.o: %.cpp

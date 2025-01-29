@@ -3,6 +3,7 @@
 -I.\lib\glad\include
 -I.\lib\spdlog\include
 -I.\lib\glm
+-I.\lib\stb_image
 
 -xc++
 -std=c++20

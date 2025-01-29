@@ -41,6 +41,13 @@ template <typename T> struct un_transf
     static_assert(false, "type deduction failed for uniform transfer");
 };
 
+template <> struct un_transf<int>
+{
+    inline static auto fun = [](int loc, int data) -> void {
+        glUniform1i(loc, data);
+    };
+};
+
 template <> struct un_transf<glm::vec3>
 {
     inline static auto fun = [](int loc, const glm::vec3 &vec) -> void {

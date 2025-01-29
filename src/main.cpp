@@ -8,6 +8,7 @@
 #include "render/buffer.h"
 #include "render/render.h"
 #include "render/shaders.h"
+#include "render/texture.h"
 #include "render/window.h"
 
 int main(int _argc, char *_argv[])
@@ -29,24 +30,35 @@ int main(int _argc, char *_argv[])
 
     engine::program prog{std::span{shaders}};
 
-    glm::vec3 vertices[]{
-        {0.0F, 0.0F, 0.0F}, // Middle point
+    // glm::vec3 vertices[]{
+    //     {0.0F, 0.0F, 0.0F}, // Middle point
+    //
+    //     {-0.25, 0.25, 0.0F}, // left top
+    //     {0.25, 0.25, 0.0F},  // right top
+    //
+    //     {-0.25, -0.25, 0.0F}, // left bottom
+    //     {0.25, -0.25, 0.0F},  // right bottm
+    // };
+    //
+    // unsigned int indices[]{0, 1, 2, 0, 3, 4};
 
-        {-0.25, 0.25, 0.0F}, // left top
-        {0.25, 0.25, 0.0F},  // right top
-
-        {-0.25, -0.25, 0.0F}, // left bottom
-        {0.25, -0.25, 0.0F},  // right bottm
+    float vertices[] = {
+        -0.5F, -0.5F, 0.0F, 0.0F, // 0
+        0.5F,  -0.5F, 1.0F, 0.0F, // 1
+        0.5F,  0.5F,  1.0F, 1.0F, // 2
+        -0.5F, 0.5F,  0.0F, 1.0F  // 3
     };
 
-    unsigned int indices[]{0, 1, 2, 0, 3, 4};
+    unsigned int indices[] = {0, 1, 2, 2, 3, 0};
 
     engine::varr  vao{};
     engine::vbuff vbo{vertices, sizeof(vertices)};
     engine::ibuff ebo{indices, sizeof(indices) / sizeof(indices[0])};
 
     engine::layout layout;
-    layout.push<float>(3);
+    // layout.push<float>(3);
+    layout.push<float>(2);
+    layout.push<float>(2);
 
     vao.add_layout(vbo, layout);
 
@@ -54,6 +66,11 @@ int main(int _argc, char *_argv[])
     // engine::window::wireframe();
 
     prog.use();
+
+    engine::texture texture{"data/textures/phone.png"};
+    texture.bind();
+
+    prog.set_uniform("u_Texture", 0);
 
     float red = 0.0F;
     float inc = 0.005F;
