@@ -4,12 +4,13 @@
 #include <span>
 #include <sstream>
 #include <string>
-#include <vector>
 
-#include "glad/glad.h"
+#include <glad/glad.h>
+#include <spdlog/spdlog.h>
+
 #include "render/shaders.h"
 
-unsigned int render::shader::gl_type_conv(const type type)
+unsigned int engine::shader::gl_type_conv(const type type)
 {
     if (type == type::vertex)
     {
@@ -24,7 +25,7 @@ unsigned int render::shader::gl_type_conv(const type type)
     return 0;
 }
 
-void render::shader::retrive_file(const std::string &path)
+void engine::shader::retrive_file(const std::string &path)
 {
     std::ifstream file{path};
     if (!file)
@@ -40,12 +41,12 @@ void render::shader::retrive_file(const std::string &path)
     file.close();
 }
 
-unsigned int render::shader::get() const
+unsigned int engine::shader::get() const
 {
     return this->_shader;
 }
 
-render::shader::shader(type type, const std::string &path) : _type(type)
+engine::shader::shader(type type, const std::string &path) : _type(type)
 {
     this->_shader = glCreateShader(shader::gl_type_conv(this->_type));
 
@@ -64,43 +65,63 @@ render::shader::shader(type type, const std::string &path) : _type(type)
         glGetShaderInfoLog(this->_shader, sizeof(log), nullptr, log);
         std::cout << "shader compilation_failed: \n" << log << "\n";
     }
-};
-
-unsigned int render::program::get() const
-{
-    return this->_program;
 }
 
-void render::program::use() const
+int engine::program::get_uniform_location(const std::string &name)
 {
-    glUseProgram(this->_program);
+    const auto cached = this->_uniform_cache.find(name);
+    if (cached != this->_uniform_cache.end())
+    {
+        return cached->second;
+    }
+
+    const int location = glGetUniformLocation(this->_id, name.c_str());
+    if (location != -1)
+    {
+        spdlog::info(
+            "program::get_uniform_location(\"{}\"): _id:{:0d} -> cache @ {:0x}",
+            name, this->_id, location);
+        this->_uniform_cache[name] = location;
+    }
+
+    return location;
 }
 
-render::program::program(std::span<shader> &&shaders) : _shaders(shaders)
+unsigned int engine::program::get() const
 {
-    this->_program = glCreateProgram();
+    return this->_id;
+}
+
+void engine::program::use() const
+{
+    glUseProgram(this->_id);
+}
+
+engine::program::program(std::span<shader> &&shaders) : _shaders(shaders)
+{
+    this->_id = glCreateProgram();
     std::ranges::for_each(this->_shaders, [this](shader &shader) {
-        glAttachShader(this->_program, shader.get());
+        glAttachShader(this->_id, shader.get());
     });
 
-    glLinkProgram(this->_program);
+    glLinkProgram(this->_id);
 
     // check for linking errors
     int  success;
     char log[512];
-    glGetProgramiv(this->_program, GL_LINK_STATUS, &success);
+    glGetProgramiv(this->_id, GL_LINK_STATUS, &success);
     if (success == 0)
     {
-        glGetProgramInfoLog(this->_program, sizeof(log), nullptr, log);
+        glGetProgramInfoLog(this->_id, sizeof(log), nullptr, log);
         std::cout << "shader program linking failed:\n" << log << "\n";
     }
 
     std::ranges::for_each(this->_shaders, [this](shader &shader) {
         glDeleteShader(shader.get());
     });
-};
+}
 
-render::program::~program()
+engine::program::~program()
 {
-    glDeleteProgram(this->_program);
+    glDeleteProgram(this->_id);
 }

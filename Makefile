@@ -3,7 +3,7 @@ EXE := teste.exe
 CC := g++
 
 # Include and Library directories
-INCS := -I.\lib\glfw\include -I.\src -I.\lib\glad\include -I.\lib\spdlog\include
+INCS := -I.\lib\glfw\include -I.\src -I.\lib\glad\include -I.\lib\spdlog\include -I.\lib\glm
 LIBS := -L.\lib\glfw\ -lglfw3dll -lopengl32 -L.\lib\spdlog\build\Debug -lspdlogd
 
 # Redistribuible libs

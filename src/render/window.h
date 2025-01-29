@@ -6,26 +6,26 @@
 #include <GLFW/glfw3.h>
 // clang-format on
 
-namespace render
+namespace engine
 {
-    class window
-    {
-        GLFWwindow *_win = nullptr;
+class window
+{
+    GLFWwindow *_win = nullptr;
 
-        public:
-        // settings
-        static constexpr unsigned int WIDTH  = 800 * 2;
-        static constexpr unsigned int HEIGHT = 600 * 2;
+    public:
+    // settings
+    static constexpr unsigned int WIDTH  = 800 * 2;
+    static constexpr unsigned int HEIGHT = 600 * 2;
 
-        void        swap() const;
-        static void wireframe();
+    void        swap() const;
+    static void wireframe();
 
-        GLFWwindow *get() const;
+    GLFWwindow *get() const;
 
-        window();
-        ~window();
-    };
-}; // namespace render
+    window();
+    ~window();
+};
+}; // namespace engine
 
 #endif
 

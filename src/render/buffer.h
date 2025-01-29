@@ -1,20 +1,15 @@
 #ifndef RENDER_BUFFER_H
 #define RENDER_BUFFER_H
 
-#include <cstdio>
-#include <glad/glad.h>
-#include <spdlog/spdlog.h>
-
 #include <cstdint>
-#include <iomanip>
-#include <ios>
-#include <iostream>
 #include <iterator>
-#include <span>
 #include <type_traits>
 #include <vector>
 
-namespace render
+#include <glad/glad.h>
+#include <spdlog/spdlog.h>
+
+namespace engine
 {
 template <unsigned int TYPE> class buffer
 {
@@ -58,7 +53,11 @@ class vbuff : public buffer<GL_ARRAY_BUFFER>
 
 class ibuff : public buffer<GL_ELEMENT_ARRAY_BUFFER>
 {
+    unsigned int _count;
+
     public:
+    unsigned int count() const;
+
     ibuff(const unsigned *idx, unsigned int count);
     ~ibuff() = default;
 };
@@ -143,7 +142,7 @@ class varr
     varr();
     ~varr();
 };
-}; // namespace render
+}; // namespace engine
 
 #endif
 

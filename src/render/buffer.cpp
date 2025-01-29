@@ -3,17 +3,23 @@
 
 #include "render/buffer.h"
 
-render::vbuff::vbuff(const void *data, const unsigned int size)
+engine::vbuff::vbuff(const void *data, const unsigned int size)
     : buffer<GL_ARRAY_BUFFER>(data, size)
 {
 }
 
-render::ibuff::ibuff(const unsigned *idx, const unsigned int count)
-    : buffer<GL_ELEMENT_ARRAY_BUFFER>(idx, count * sizeof(unsigned int))
+engine::ibuff::ibuff(const unsigned *idx, const unsigned int count)
+    : buffer<GL_ELEMENT_ARRAY_BUFFER>(idx, count * sizeof(unsigned int)),
+      _count(count)
 {
 }
 
-unsigned int render::element::type_size(GLenum type)
+unsigned int engine::ibuff::count() const
+{
+    return this->_count;
+}
+
+unsigned int engine::element::type_size(GLenum type)
 {
 #define ELM_TYPE_SIZE(T, I) \
     case T: {               \
@@ -37,22 +43,22 @@ unsigned int render::element::type_size(GLenum type)
     return 0;
 }
 
-unsigned int render::element::type_size() const
+unsigned int engine::element::type_size() const
 {
     return type_size(this->type);
 }
 
-auto render::layout::elements() const -> const decltype(_elements) &
+auto engine::layout::elements() const -> const decltype(_elements) &
 {
     return this->_elements;
 }
 
-int render::layout::stride() const
+int engine::layout::stride() const
 {
     return this->_stride;
 }
 
-void render::varr::add_layout(const vbuff &vbo, const layout &layout)
+void engine::varr::add_layout(const vbuff &vbo, const layout &layout)
 {
     this->bind();
     vbo.bind();
@@ -72,7 +78,7 @@ void render::varr::add_layout(const vbuff &vbo, const layout &layout)
     }
 }
 
-render::varr::varr()
+engine::varr::varr()
 {
     glGenVertexArrays(1, &this->_id);
     spdlog::info("varr(): _id:{:0d}", this->_id);
@@ -80,18 +86,18 @@ render::varr::varr()
     glBindVertexArray(this->_id);
 }
 
-render::varr::~varr()
+engine::varr::~varr()
 {
     spdlog::info("~varr(): _id:{:0d}", this->_id);
     glDeleteVertexArrays(1, &this->_id);
 }
 
-void render::varr::bind() const
+void engine::varr::bind() const
 {
     glBindVertexArray(this->_id);
-};
+}
 
-void render::varr::unbind() const
+void engine::varr::unbind() const
 {
     glBindVertexArray(0);
 }

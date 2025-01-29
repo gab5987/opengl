@@ -8,22 +8,22 @@
 
 #include "render/window.h"
 
-void render::window::swap() const
+void engine::window::swap() const
 {
     glfwSwapBuffers(this->_win);
 }
 
-void render::window::wireframe()
+void engine::window::wireframe()
 {
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
-GLFWwindow *render::window::get() const
+GLFWwindow *engine::window::get() const
 {
     return this->_win;
 }
 
-render::window::window()
+engine::window::window()
 {
     glfwInit();
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -56,7 +56,7 @@ render::window::window()
     }
 }
 
-render::window::~window()
+engine::window::~window()
 {
     glfwTerminate();
 }

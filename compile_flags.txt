@@ -1,7 +1,8 @@
--I.\lib\glfw\include
 -I.\src
+-I.\lib\glfw\include
 -I.\lib\glad\include
 -I.\lib\spdlog\include
+-I.\lib\glm
 
 -xc++
 -std=c++20
