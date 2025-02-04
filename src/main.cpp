@@ -10,6 +10,7 @@
 
 #include "global.h"
 #include "osd/osd.h"
+#include "osd/scene.h"
 #include "render/buffer.h"
 #include "render/render.h"
 #include "render/shaders.h"
@@ -18,19 +19,13 @@
 
 int main(int _argc, char *_argv[])
 {
-    spdlog::info(
-        "spdlog version {}.{}.{}", SPDLOG_VER_MAJOR, SPDLOG_VER_MINOR,
-        SPDLOG_VER_PATCH);
-
     engine::render render{};
     engine::window window{};
 
-    osd::osd osd{window};
+    osd::osd   osd{window};
+    osd::scene scene = osd::scene{osd};
 
     gstate = new global{&render, &window};
-
-    const char *gl_version = (char *)(glGetString(GL_VERSION));
-    spdlog::info("OpenGL {}", gl_version);
 
     using shader_type = engine::shader::type;
 
@@ -39,12 +34,6 @@ int main(int _argc, char *_argv[])
         engine::shader{shader_type::fragment, "data/shaders/basic_frag.glsl"}};
 
     engine::program prog{std::span{shaders}};
-
-    osd.add_ctx("FrameRate", [](auto &_io) {
-        ImGui::Text(
-            "Application average %.3f ms/frame (%.1f FPS)",
-            1000.0F / _io.Framerate, _io.Framerate);
-    });
 
     // glm::vec3 vertices[]{
     //     {0.0F, 0.0F, 0.0F}, // Middle point

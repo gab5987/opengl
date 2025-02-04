@@ -14,8 +14,15 @@ void engine::window::swap() const
     glfwSwapBuffers(this->_win);
 }
 
-void engine::window::wireframe()
+void engine::window::normal_mode()
 {
+    spdlog::info("window::normal_mode()");
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+}
+
+void engine::window::wireframe_mode()
+{
+    spdlog::info("window::wireframe_mode()");
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
@@ -25,6 +32,8 @@ float engine::window::get_dpi_scale() const
     float yscale = 0.0F;
 
     glfwGetWindowContentScale(this->_win, &xscale, &yscale);
+
+    spdlog::info("window::get_dpi_scale(): xscale:{}", xscale);
 
     return xscale;
 }
@@ -72,6 +81,9 @@ engine::window::window()
         spdlog::error("Failed to initialize GLAD");
         exit(-1);
     }
+
+    const char *gl_version = (char *)(glGetString(GL_VERSION));
+    spdlog::info("OpenGL {}", gl_version);
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
