@@ -1,6 +1,7 @@
 #ifndef RENDER_SHADERS_H
 #define RENDER_SHADERS_H
 
+#include "glm/ext/matrix_float4x4.hpp"
 #include <span>
 #include <string>
 #include <unordered_map>
@@ -52,6 +53,13 @@ template <> struct un_transf<glm::vec3>
 {
     inline static auto fun = [](int loc, const glm::vec3 &vec) -> void {
         glUniform3f(loc, vec.x, vec.y, vec.z);
+    };
+};
+
+template <> struct un_transf<glm::mat4>
+{
+    inline static auto fun = [](int loc, const glm::mat4 &mat) -> void {
+        glUniformMatrix4fv(loc, 1, GL_FALSE, &(mat[0][0]));
     };
 };
 

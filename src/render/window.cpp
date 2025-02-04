@@ -1,5 +1,6 @@
 #include <cstdlib>
-#include <iostream>
+
+#include <spdlog/spdlog.h>
 
 // clang-format off
 #include <glad/glad.h>
@@ -18,6 +19,16 @@ void engine::window::wireframe()
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
 
+float engine::window::get_dpi_scale() const
+{
+    float xscale = 0.0F;
+    float yscale = 0.0F;
+
+    glfwGetWindowContentScale(this->_win, &xscale, &yscale);
+
+    return xscale;
+}
+
 GLFWwindow *engine::window::get() const
 {
     return this->_win;
@@ -29,29 +40,36 @@ engine::window::window()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_SCALE_TO_MONITOR, GLFW_TRUE);
 
     this->_win = glfwCreateWindow(WIDTH, HEIGHT, "OpenGL", nullptr, nullptr);
     if (this->_win == nullptr)
     {
-        std::cout << "Failed to create GLFW window\n";
+        spdlog::error("Failed to create GLFW window");
 
         glfwTerminate();
         exit(-1);
     }
 
     glfwMakeContextCurrent(this->_win);
+    glfwSwapInterval(1); // Enable vsync
+
     glfwSetFramebufferSizeCallback(
         this->_win, [](GLFWwindow *_win, int width, int height) {
             // make sure the viewport matches the new window dimensions;
             // that width and height will be significantly larger than
             // specified on high res displays.
             glViewport(0, 0, width, height);
+            spdlog::info(
+                "window::glfwSetFramebufferSizeCallback(_win, <lambda>): "
+                "viewport resized: (x:{} y:{})",
+                width, height);
         });
 
     // glad: load all OpenGL function pointers
     if (gladLoadGLLoader((GLADloadproc)glfwGetProcAddress) == 0)
     {
-        std::cout << "Failed to initialize GLAD\n";
+        spdlog::error("Failed to initialize GLAD");
         exit(-1);
     }
 
@@ -62,4 +80,5 @@ engine::window::window()
 engine::window::~window()
 {
     glfwTerminate();
+    spdlog::warn("Window terminated");
 }

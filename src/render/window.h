@@ -1,10 +1,7 @@
 #ifndef RENDER_WINDOW_H
 #define RENDER_WINDOW_H
 
-// clang-format off
-#include <glad/glad.h>
 #include <GLFW/glfw3.h>
-// clang-format on
 
 namespace engine
 {
@@ -14,11 +11,13 @@ class window
 
     public:
     // settings
-    static constexpr unsigned int WIDTH  = 800 * 2;
-    static constexpr unsigned int HEIGHT = 600 * 2;
+    static constexpr unsigned int WIDTH  = 800;
+    static constexpr unsigned int HEIGHT = 600;
 
     void        swap() const;
     static void wireframe();
+
+    float get_dpi_scale() const;
 
     GLFWwindow *get() const;
 
