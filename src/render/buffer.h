@@ -7,6 +7,7 @@
 #include <vector>
 
 #include <glad/glad.h>
+#include <glm/vec3.hpp>
 #include <spdlog/spdlog.h>
 
 namespace engine
@@ -93,24 +94,22 @@ ELM_TYPE_DEF(unsigned int, GL_UNSIGNED_INT);
 
 class layout
 {
-    private:
     int                  _stride = 0;
     std::vector<element> _elements;
 
     template <typename T> static consteval GLenum form_type()
     {
-        static_assert(
-            !(std::is_same<
-                decltype(gltype<T>::VALUE),
-                std::unreachable_sentinel_t>::value),
-            "Buffer type could not be resolved");
+        constexpr bool INVALID = std::is_same_v<
+            decltype(gltype<T>::VALUE), std::unreachable_sentinel_t>;
+
+        static_assert(!INVALID, "Buffer type could not be resolved");
 
         return gltype<T>::VALUE;
     };
 
     public:
-    int  stride() const;
-    auto elements() const -> const decltype(_elements) &;
+    [[nodiscard]] int  stride() const;
+    [[nodiscard]] auto elements() const -> const decltype(_elements) &;
 
     template <typename T> void push(int count = 1)
     {
@@ -145,4 +144,3 @@ class varr
 }; // namespace engine
 
 #endif
-

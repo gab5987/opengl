@@ -19,9 +19,11 @@ class window
     static void normal_mode();
     static void wireframe_mode();
 
-    float get_dpi_scale() const;
+    [[nodiscard]] bool should_close() const;
 
-    GLFWwindow *get() const;
+    [[nodiscard]] float get_dpi_scale() const;
+
+    [[nodiscard]] GLFWwindow *get() const;
 
     window();
     ~window();
@@ -29,4 +31,3 @@ class window
 }; // namespace engine
 
 #endif
-

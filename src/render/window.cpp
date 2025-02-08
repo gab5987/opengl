@@ -25,6 +25,10 @@ void engine::window::wireframe_mode()
     spdlog::info("window::wireframe_mode()");
     glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 }
+bool engine::window::should_close() const
+{
+    return glfwWindowShouldClose(this->_win) != 0;
+}
 
 float engine::window::get_dpi_scale() const
 {
@@ -85,6 +89,7 @@ engine::window::window()
     const char *gl_version = (char *)(glGetString(GL_VERSION));
     spdlog::info("OpenGL {}", gl_version);
 
+    glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }

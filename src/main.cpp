@@ -1,5 +1,6 @@
 #include <array>
 #include <memory>
+#include <numeric>
 #include <span>
 
 #include <glm/ext/matrix_float4x4.hpp>
@@ -8,7 +9,6 @@
 #include <imgui.h>
 #include <spdlog/spdlog.h>
 
-#include "global.h"
 #include "osd/osd.h"
 #include "osd/scene.h"
 #include "render/buffer.h"
@@ -25,8 +25,6 @@ int main(int _argc, char *_argv[])
     osd::osd   osd{window};
     osd::scene scene{osd};
 
-    gstate = new global{&render, &window};
-
     using shader_type = engine::shader::type;
 
     std::array shaders{
@@ -35,88 +33,111 @@ int main(int _argc, char *_argv[])
 
     engine::program prog{std::span{shaders}};
 
-    glm::vec3 vertices[]{
-        {0.0F, 0.0F, 0.0F},     // BOT LEFT
-        {0.0F, 300.0F, 0.0F},   // BOT RIGHT
-        {400.0F, 0.0F, 0.0F},   // TOP LEFT
-        {400.0F, 300.0F, 0.0F}, // TOP RIGHT
+    struct [[gnu::packed]] vertex
+    {
+        const glm::vec3 texel_pos;
+        glm::vec2       texture_pos;
     };
 
-    // glm::vec3 vertices[]{
-    //     {0.0F, 0.0F, 0.0F}, // BOT LEFT
-    //     {0.0F, 0.5F, 0.0F}, // BOT RIGHT
-    //     {0.5F, 0.0F, 0.0F}, // TOP LEFT
-    //     {0.5F, 0.5F, 0.0F}, // TOP RIGHT
+    // vertex vertices[]{
+    //     {{0.5f, 0.5f, 0.0f}, {1.0f, 1.0f}},
+    //     {{0.5f, -0.5f, 0.0f}, {1.0f, 0.0f}},
+    //     {{-0.5f, -0.5f, 0.0f}, {0.0f, 0.0f}},
+    //     {{-0.5f, 0.5f, 0.0f}, {0.0f, 1.0f}},
     // };
 
-    unsigned int indices[]{0, 1, 2, 2, 3, 1};
+    vertex vertices[] = {
+        {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f}},
+        {{0.5f, -0.5f, -0.5f}, {1.0f, 0.0f}},
+        {{0.5f, 0.5f, -0.5f}, {1.0f, 1.0f}},
+        {{0.5f, 0.5f, -0.5f}, {1.0f, 1.0f}},
+        {{-0.5f, 0.5f, -0.5f}, {0.0f, 1.0f}},
+        {{-0.5f, -0.5f, -0.5f}, {0.0f, 0.0f}},
+
+        {{-0.5f, -0.5f, 0.5f}, {0.0f, 0.0f}},
+        {{0.5f, -0.5f, 0.5f}, {1.0f, 0.0f}},
+        {{0.5f, 0.5f, 0.5f}, {1.0f, 1.0f}},
+        {{0.5f, 0.5f, 0.5f}, {1.0f, 1.0f}},
+        {{-0.5f, 0.5f, 0.5f}, {0.0f, 1.0f}},
+        {{-0.5f, -0.5f, 0.5f}, {0.0f, 0.0f}},
+
+        {{-0.5f, 0.5f, 0.5f}, {1.0f, 0.0f}},
+        {{-0.5f, 0.5f, -0.5f}, {1.0f, 1.0f}},
+        {{-0.5f, -0.5f, -0.5f}, {0.0f, 1.0f}},
+        {{-0.5f, -0.5f, -0.5f}, {0.0f, 1.0f}},
+        {{-0.5f, -0.5f, 0.5f}, {0.0f, 0.0f}},
+        {{-0.5f, 0.5f, 0.5f}, {1.0f, 0.0f}},
+
+        {{0.5f, 0.5f, 0.5f}, {1.0f, 0.0f}},
+        {{0.5f, 0.5f, -0.5f}, {1.0f, 1.0f}},
+        {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f}},
+        {{0.5f, -0.5f, -0.5f}, {0.0f, 1.0f}},
+        {{0.5f, -0.5f, 0.5f}, {0.0f, 0.0f}},
+        {{0.5f, 0.5f, 0.5f}, {1.0f, 0.0f}},
+
+        {{-0.5f, -0.5f, -0.5f}, {0.0f, 1.0f}},
+        {{0.5f, -0.5f, -0.5f}, {1.0f, 1.0f}},
+        {{0.5f, -0.5f, 0.5f}, {1.0f, 0.0f}},
+        {{0.5f, -0.5f, 0.5f}, {1.0f, 0.0f}},
+        {{-0.5f, -0.5f, 0.5f}, {0.0f, 0.0f}},
+        {{-0.5f, -0.5f, -0.5f}, {0.0f, 1.0f}},
+
+        {{-0.5f, 0.5f, -0.5f}, {0.0f, 1.0f}},
+        {{0.5f, 0.5f, -0.5f}, {1.0f, 1.0f}},
+        {{0.5f, 0.5f, 0.5f}, {1.0f, 0.0f}},
+        {{0.5f, 0.5f, 0.5f}, {1.0f, 0.0f}},
+        {{-0.5f, 0.5f, 0.5f}, {0.0f, 0.0f}},
+        {{-0.5f, 0.5f, -0.5f}, {0.0f, 1.0f}},
+    };
+
+    unsigned int indices[std::size(vertices)]{};
+    std::iota(std::begin(indices), std::end(indices), 0);
 
     engine::varr  vao{};
     engine::vbuff vbo{vertices, sizeof(vertices)};
     engine::ibuff ebo{indices, std::size(indices)};
 
-    const glm::mat4 ortho = glm::ortho(0.0F, 800.0F, 0.0F, 600.0F, 0.1F, 100.0F);
-
     engine::layout layout;
     layout.push<float>(3);
+    layout.push<float>(2);
 
     vao.add_layout(vbo, layout);
 
-    // to draw in wireframe polygons.
-    // engine::window::wireframe();
+    const engine::texture texture{"data/textures/box.png"};
+    texture.bind();
 
-    prog.use();
-
-    // engine::texture texture{"data/textures/phone.png"};
-    // texture.bind();
-
-    // prog.set_uniform("u_Texture", 0);
-    prog.set_uniform("u_mvp", ortho);
-
-    // float red = 0.0F;
-    // float inc = 0.005F;
-
-    while (glfwWindowShouldClose(window.get()) == 0)
+    while (!window.should_close())
     {
-        // input
-        // -----
-        if (glfwGetKey(window.get(), GLFW_KEY_ESCAPE) == GLFW_PRESS)
-        {
-            glfwSetWindowShouldClose(window.get(), 1);
-        }
-
-        glClearColor(0.2F, 0.3F, 0.3F, 1.0F);
-        glClear(GL_COLOR_BUFFER_BIT);
+        render.clear();
 
         prog.use();
-        prog.set_uniform("un_color", glm::vec3{1.0F, 0.0F, 0.0F});
-        prog.set_uniform("u_mvp", ortho);
-        // prog.set_uniform("un_color", glm::vec3{red, 0, 0});
+        prog.set_uniform("u_texture", 0);
+
+        // create transformations
+        glm::mat4 model{1.0f};
+        glm::mat4 view{1.0f};
+        glm::mat4 projection;
+
+        model = glm::rotate(
+            model, static_cast<float>(glfwGetTime()),
+            glm::vec3(0.5f, 1.0f, 0.0f));
+        // model = glm::rotate(
+        //     model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+        view       = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+        projection = glm::perspective(
+            glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+
+        prog.set_uniform("u_view", view);
+        prog.set_uniform("u_proj", projection);
+        prog.set_uniform("u_model", model);
 
         render.draw(vao, ebo, prog);
 
-        // if (red >= 0.99F || red <= -0.99F)
-        // {
-        //     inc = -1 * inc;
-        // }
-        // red += inc;
-
-        // glm::mat4 trans = ortho;
-        // trans           = glm::translate(trans, glm::vec3{0.5F, -0.5F,
-        // 0.0F});
-        // trans = glm::rotate(
-        //     trans, (float)glfwGetTime(), glm::vec3{0.0F, 0.0F, 1.0F});
-
-        // prog.set_uniform("u_MVP", trans);
-
         osd.draw();
 
-        // glfw: swap buffers and poll IO events (keys pressed/released,
-        // mouse moved etc.)
         window.swap();
         glfwPollEvents();
     }
 
     return 0;
 }
-

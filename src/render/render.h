@@ -14,4 +14,3 @@ class render
 }; // namespace engine
 
 #endif
-
