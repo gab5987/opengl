@@ -3,17 +3,17 @@ EXE := teste.exe
 CC := g++
 
 # Include and Library directories
-INCS := 														  \
-				-I.\lib\glfw\include 					\
+INCS := \
+				-I.\lib\glfw\include \
 				-I.\src -I.\lib\glad\include  \
 				-I.\lib\spdlog\include        \
 				-I.\lib\glm                   \
-				-I.\lib\stb_image							\
+				-I.\lib\stb_image			\
 				-I.\lib\imgui
 
 LIBS := -L.\lib\glfw\ -lglfw3dll -lopengl32 -lws2_32 -lpthread
 
-# Redistribuible libs
+# Redistribute libs
 GLFW_DLL := .\lib\glfw\glfw3.dll
 
 # Output directory and file

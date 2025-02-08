@@ -15,7 +15,7 @@ std::string osd::osd::add_ctx(
     const std::string rid = util::randstr(5);
     this->_ctxs.emplace_back(rid, name, drawer);
 
-    spdlog::info("osd::add_ctx(\"{}\"): rid:\"{}\"", name, rid);
+    spdlog::info(R"(osd::add_ctx("{}"): rid:"{}")", name, rid);
 
     return rid;
 }

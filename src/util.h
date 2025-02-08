@@ -6,7 +6,7 @@
 
 namespace util
 {
-inline std::string randstr(std::string::size_type length)
+std::string randstr(std::string::size_type length)
 {
     static constexpr const auto &CHRS = "0123456789"
                                         "abcdefghijklmnopqrstuvwxyz"

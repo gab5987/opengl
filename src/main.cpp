@@ -23,49 +23,42 @@ int main(int _argc, char *_argv[])
     engine::window window{};
 
     osd::osd   osd{window};
-    osd::scene scene = osd::scene{osd};
+    osd::scene scene{osd};
 
     gstate = new global{&render, &window};
 
     using shader_type = engine::shader::type;
 
-    std::array<engine::shader, 2> shaders{
+    std::array shaders{
         engine::shader{shader_type::vertex, "data/shaders/basic_vert.glsl"},
         engine::shader{shader_type::fragment, "data/shaders/basic_frag.glsl"}};
 
     engine::program prog{std::span{shaders}};
 
-    // glm::vec3 vertices[]{
-    //     {0.0F, 0.0F, 0.0F}, // Middle point
-    //
-    //     {-0.25, 0.25, 0.0F}, // left top
-    //     {0.25, 0.25, 0.0F},  // right top
-    //
-    //     {-0.25, -0.25, 0.0F}, // left bottom
-    //     {0.25, -0.25, 0.0F},  // right bottm
-    // };
-    //
-    // unsigned int indices[]{0, 1, 2, 0, 3, 4};
-
-    float vertices[] = {
-        -0.5F, -0.5F, 0.0F, 0.0F, // 0
-        0.5F,  -0.5F, 1.0F, 0.0F, // 1
-        0.5F,  0.5F,  1.0F, 1.0F, // 2
-        -0.5F, 0.5F,  0.0F, 1.0F  // 3
+    glm::vec3 vertices[]{
+        {0.0F, 0.0F, 0.0F},     // BOT LEFT
+        {0.0F, 300.0F, 0.0F},   // BOT RIGHT
+        {400.0F, 0.0F, 0.0F},   // TOP LEFT
+        {400.0F, 300.0F, 0.0F}, // TOP RIGHT
     };
 
-    unsigned int indices[] = {0, 1, 2, 2, 3, 0};
+    // glm::vec3 vertices[]{
+    //     {0.0F, 0.0F, 0.0F}, // BOT LEFT
+    //     {0.0F, 0.5F, 0.0F}, // BOT RIGHT
+    //     {0.5F, 0.0F, 0.0F}, // TOP LEFT
+    //     {0.5F, 0.5F, 0.0F}, // TOP RIGHT
+    // };
+
+    unsigned int indices[]{0, 1, 2, 2, 3, 1};
 
     engine::varr  vao{};
     engine::vbuff vbo{vertices, sizeof(vertices)};
-    engine::ibuff ebo{indices, sizeof(indices) / sizeof(indices[0])};
+    engine::ibuff ebo{indices, std::size(indices)};
 
-    glm::mat4 ortho = glm::ortho(-2.0F, 2.0F, -1.5F, 1.5F, -1.0F, 1.0F);
+    const glm::mat4 ortho = glm::ortho(0.0F, 800.0F, 0.0F, 600.0F, 0.1F, 100.0F);
 
     engine::layout layout;
-    // layout.push<float>(3);
-    layout.push<float>(2);
-    layout.push<float>(2);
+    layout.push<float>(3);
 
     vao.add_layout(vbo, layout);
 
@@ -74,11 +67,11 @@ int main(int _argc, char *_argv[])
 
     prog.use();
 
-    engine::texture texture{"data/textures/phone.png"};
-    texture.bind();
+    // engine::texture texture{"data/textures/phone.png"};
+    // texture.bind();
 
-    prog.set_uniform("u_Texture", 0);
-    prog.set_uniform("u_MVP", ortho);
+    // prog.set_uniform("u_Texture", 0);
+    prog.set_uniform("u_mvp", ortho);
 
     // float red = 0.0F;
     // float inc = 0.005F;
@@ -96,6 +89,8 @@ int main(int _argc, char *_argv[])
         glClear(GL_COLOR_BUFFER_BIT);
 
         prog.use();
+        prog.set_uniform("un_color", glm::vec3{1.0F, 0.0F, 0.0F});
+        prog.set_uniform("u_mvp", ortho);
         // prog.set_uniform("un_color", glm::vec3{red, 0, 0});
 
         render.draw(vao, ebo, prog);
@@ -106,13 +101,13 @@ int main(int _argc, char *_argv[])
         // }
         // red += inc;
 
-        glm::mat4 trans = ortho;
+        // glm::mat4 trans = ortho;
         // trans           = glm::translate(trans, glm::vec3{0.5F, -0.5F,
         // 0.0F});
-        trans = glm::rotate(
-            trans, (float)glfwGetTime(), glm::vec3{0.0F, 0.0F, 1.0F});
+        // trans = glm::rotate(
+        //     trans, (float)glfwGetTime(), glm::vec3{0.0F, 0.0F, 1.0F});
 
-        prog.set_uniform("u_MVP", trans);
+        // prog.set_uniform("u_MVP", trans);
 
         osd.draw();
 
