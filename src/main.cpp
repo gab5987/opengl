@@ -90,6 +90,13 @@ int main(int _argc, char *_argv[])
         {{-0.5f, 0.5f, -0.5f}, {0.0f, 1.0f}},
     };
 
+    glm::vec3 cube_positions[] = {
+        glm::vec3(2.0f, 5.0f, -15.0f),   glm::vec3(-1.5f, -2.2f, -2.5f),
+        glm::vec3(-3.8f, -2.0f, -12.3f), glm::vec3(2.4f, -0.4f, -3.5f),
+        glm::vec3(-1.7f, 3.0f, -7.5f),   glm::vec3(1.3f, -2.0f, -2.5f),
+        glm::vec3(1.5f, 2.0f, -2.5f),    glm::vec3(1.5f, 0.2f, -1.5f),
+        glm::vec3(-1.3f, 1.0f, -1.5f)};
+
     unsigned int indices[std::size(vertices)]{};
     std::iota(std::begin(indices), std::end(indices), 0);
 
@@ -118,20 +125,34 @@ int main(int _argc, char *_argv[])
         glm::mat4 view{1.0f};
         glm::mat4 projection;
 
-        model = glm::rotate(
-            model, static_cast<float>(glfwGetTime()),
-            glm::vec3(0.5f, 1.0f, 0.0f));
+        // model = glm::rotate(
+        //     model, static_cast<float>(glfwGetTime()),
+        //     glm::vec3(0.5f, 1.0f, 0.0f));
         // model = glm::rotate(
         //     model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
         view       = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
         projection = glm::perspective(
             glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
-        prog.set_uniform("u_view", view);
-        prog.set_uniform("u_proj", projection);
-        prog.set_uniform("u_model", model);
+        for (unsigned int i = 0; i < std::size(cube_positions); i++)
+        {
+            model = glm::mat4(1.0f);
+            model = glm::translate(model, cube_positions[i]);
 
-        render.draw(vao, ebo, prog);
+            float angle =
+                static_cast<float>(glfwGetTime()) * (i % 2 ? -1.0f : 1.0f);
+            model = glm::rotate(model, angle, glm::vec3(0.5f, 1.0f, 0.0f));
+
+            angle = 20.0f * i;
+            model = glm::rotate(
+                model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+
+            prog.set_uniform("u_view", view);
+            prog.set_uniform("u_proj", projection);
+            prog.set_uniform("u_model", model);
+
+            render.draw(vao, ebo, prog);
+        }
 
         osd.draw();
 
