@@ -1,7 +1,7 @@
 #include <glad/glad.h>
 #include <stb_image.h>
 
-#include "render/texture.h"
+#include "engine/texture.h"
 
 engine::texture::texture(const std::string &path) : _file_path(path)
 {

@@ -1,5 +1,5 @@
-#ifndef RENDER_BUFFER_H
-#define RENDER_BUFFER_H
+#ifndef ENGINE_BUFFER_H
+#define ENGINE_BUFFER_H
 
 #include <cstdint>
 #include <iterator>

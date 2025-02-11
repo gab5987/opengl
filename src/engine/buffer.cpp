@@ -1,7 +1,7 @@
 #include <cstddef>
 #include <spdlog/spdlog.h>
 
-#include "render/buffer.h"
+#include "engine/buffer.h"
 
 engine::vbuff::vbuff(const void *data, const unsigned int size)
     : buffer<GL_ARRAY_BUFFER>(data, size)

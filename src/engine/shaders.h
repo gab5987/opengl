@@ -1,5 +1,5 @@
-#ifndef RENDER_SHADERS_H
-#define RENDER_SHADERS_H
+#ifndef ENGINE_SHADERS_H
+#define ENGINE_SHADERS_H
 
 #include "glm/ext/matrix_float4x4.hpp"
 #include <span>

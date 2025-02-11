@@ -1,8 +1,8 @@
 #include <glad/glad.h>
 
-#include "render/buffer.h"
-#include "render/render.h"
-#include "render/shaders.h"
+#include "engine/buffer.h"
+#include "engine/render.h"
+#include "engine/shaders.h"
 
 void engine::render::clear() const
 {

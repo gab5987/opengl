@@ -9,13 +9,14 @@
 #include <imgui.h>
 #include <spdlog/spdlog.h>
 
+#include "engine/buffer.h"
+#include "engine/camera.h"
+#include "engine/render.h"
+#include "engine/shaders.h"
+#include "engine/texture.h"
+#include "engine/window.h"
 #include "osd/osd.h"
 #include "osd/scene.h"
-#include "render/buffer.h"
-#include "render/render.h"
-#include "render/shaders.h"
-#include "render/texture.h"
-#include "render/window.h"
 
 int main(int _argc, char *_argv[])
 {
@@ -24,6 +25,8 @@ int main(int _argc, char *_argv[])
 
     osd::osd   osd{window};
     osd::scene scene{osd};
+
+    engine::camera camera{window};
 
     using shader_type = engine::shader::type;
 
@@ -116,21 +119,16 @@ int main(int _argc, char *_argv[])
     while (!window.should_close())
     {
         render.clear();
+        camera.update();
 
         prog.use();
         prog.set_uniform("u_texture", 0);
 
         // create transformations
         glm::mat4 model{1.0f};
-        glm::mat4 view{1.0f};
+        glm::mat4 view = camera.get_view_matrix();
         glm::mat4 projection;
 
-        // model = glm::rotate(
-        //     model, static_cast<float>(glfwGetTime()),
-        //     glm::vec3(0.5f, 1.0f, 0.0f));
-        // model = glm::rotate(
-        //     model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-        view       = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
         projection = glm::perspective(
             glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 
@@ -155,9 +153,7 @@ int main(int _argc, char *_argv[])
         }
 
         osd.draw();
-
-        window.swap();
-        glfwPollEvents();
+        window.update();
     }
 
     return 0;
